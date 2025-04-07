@@ -117,118 +117,133 @@ const VisualizerPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Update the evaluateExpression function
   const evaluateExpression = (expression) => {
     try {
-      // Improved tokenization with better spacing handling
+      // Clean and tokenize the expression
       const tokens = expression
-        .replace(/([()∪∩\-⊆])/g, ' $1 ') // Add spaces around operators
+        .replace(/([()∪∩\-⊆])/g, ' $1 ')
         .trim()
         .split(/\s+/)
         .filter(Boolean);
 
+      // Simple stack-based evaluator
       const stack = [];
-      const operators = {
-        '∪': 1, // Union
-        '∩': 2, // Intersection 
-        '-': 2, // Difference
-        '⊆': 1, // Subset
-      };
-
-      const evaluateTop = () => {
-        if (stack.length < 3) {
-          throw new Error('Invalid expression: not enough operands');
-        }
-
-        const operand2 = stack.pop();
-        const operator = stack.pop();
-        const operand1 = stack.pop();
-
-        if (!operand1 || !operand2 || !operator || !(operator in operators)) {
-          throw new Error('Invalid expression syntax');
-        }
-
-        return applyOperation(operator, operand1, operand2);
-      };
+      let currentSet = null;
 
       for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i];
 
-        if (token === '(') {
-          stack.push(token);
-        } else if (token === ')') {
-          let foundOpenParen = false;
-          while (stack.length > 0) {
-            if (stack[stack.length - 1] === '(') {
-              stack.pop();
-              foundOpenParen = true;
-              break;
-            }
-            const result = evaluateTop();
-            stack.push(result);
-          }
-          if (!foundOpenParen) {
-            throw new Error('Mismatched parentheses');
-          }
-        } else if (token === 'A' || token === 'B' || token === 'C') {
+        // Handle sets
+        if (token === 'A' || token === 'B' || token === 'C') {
           if (!sets[token]?.elements) {
             throw new Error(`Set ${token} is not defined`);
           }
-          stack.push(sets[token].elements);
-        } else if (token in operators) {
-          while (
-            stack.length > 0 &&
-            stack[stack.length - 1] !== '(' &&
-            stack[stack.length - 1] in operators &&
-            operators[stack[stack.length - 1]] >= operators[token]
-          ) {
-            const result = evaluateTop();
-            stack.push(result);
+          
+          if (currentSet === null) {
+            currentSet = new Set([...sets[token].elements]);
           }
+          else {
+            const operator = stack.pop();
+            if (!operator) {
+              throw new Error('Missing operator');
+            }
+            
+            // Apply operation
+            switch (operator) {
+              case '∪':
+                currentSet = new Set([...currentSet, ...sets[token].elements]);
+                break;
+              case '∩':
+                currentSet = new Set([...currentSet].filter(x => sets[token].elements.has(x)));
+                break;
+              case '-':
+                currentSet = new Set([...currentSet].filter(x => !sets[token].elements.has(x)));
+                break;
+              case '⊆':
+                currentSet = new Set([Array.from(currentSet).every(x => sets[token].elements.has(x))]);
+                break;
+              default:
+                throw new Error(`Unknown operator: ${operator}`);
+            }
+          }
+        }
+        // Handle operators
+        else if (token === '∪' || token === '∩' || token === '-' || token === '⊆') {
           stack.push(token);
-        } else {
+        }
+        // Handle parentheses
+        else if (token === '(') {
+          stack.push(token);
+        }
+        else if (token === ')') {
+          while (stack.length > 0 && stack[stack.length - 1] !== '(') {
+            const operator = stack.pop();
+            if (!operator) {
+              throw new Error('Invalid expression');
+            }
+            
+            // Apply operation from stack
+            const nextSet = stack.pop();
+            if (!nextSet || !(nextSet instanceof Set)) {
+              throw new Error('Invalid expression');
+            }
+            
+            switch (operator) {
+              case '∪':
+                currentSet = new Set([...currentSet, ...nextSet]);
+                break;
+              case '∩':
+                currentSet = new Set([...currentSet].filter(x => nextSet.has(x)));
+                break;
+              case '-':
+                currentSet = new Set([...currentSet].filter(x => !nextSet.has(x)));
+                break;
+              case '⊆':
+                currentSet = new Set([Array.from(currentSet).every(x => nextSet.has(x))]);
+                break;
+            }
+          }
+          
+          if (stack.pop() !== '(') {
+            throw new Error('Mismatched parentheses');
+          }
+        }
+        else {
           throw new Error(`Unknown token: ${token}`);
         }
       }
 
-      while (stack.length > 1) {
-        if (stack[stack.length - 1] === '(' || stack[stack.length - 1] === ')') {
-          throw new Error('Mismatched parentheses');
+      // Handle any remaining operators
+      while (stack.length > 0) {
+        const operator = stack.pop();
+        const nextSet = stack.pop();
+        
+        if (!operator || !nextSet || !(nextSet instanceof Set)) {
+          throw new Error('Invalid expression');
         }
-        const result = evaluateTop();
-        stack.push(result);
+        
+        switch (operator) {
+          case '∪':
+            currentSet = new Set([...currentSet, ...nextSet]);
+            break;
+          case '∩':
+            currentSet = new Set([...currentSet].filter(x => nextSet.has(x)));
+            break;
+          case '-':
+            currentSet = new Set([...currentSet].filter(x => !nextSet.has(x)));
+            break;
+          case '⊆':
+            currentSet = new Set([Array.from(currentSet).every(x => nextSet.has(x))]);
+            break;
+        }
       }
 
-      if (stack.length === 0) {
-        throw new Error('Empty expression');
-      }
+      return currentSet || new Set();
 
-      return stack[0];
     } catch (error) {
       console.error('Expression evaluation error:', error);
       alert(`Invalid expression: ${error.message}`);
       return new Set();
-    }
-  };
-
-  // Update the applyOperation function to handle all cases
-  const applyOperation = (operator, a, b) => {
-    if (!(a instanceof Set) || !(b instanceof Set)) {
-      throw new Error('Invalid operands');
-    }
-
-    switch (operator) {
-      case '∪':
-        return new Set([...a, ...b]);
-      case '∩':
-        return new Set([...a].filter(x => b.has(x)));
-      case '-':
-        return new Set([...a].filter(x => !b.has(x)));
-      case '⊆':
-        const isSubset = Array.from(a).every(x => b.has(x));
-        return new Set([isSubset]); // Return as Set to maintain consistency
-      default:
-        throw new Error(`Unknown operator: ${operator}`);
     }
   };
 
