@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import TheoryPage from './pages/TheoryPage'
 import PracticePage from './pages/PracticePage'
+import VisualizerPage from './pages/VisualizerPage'
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/theory" element={<TheoryPage />} />
         <Route path="/practice/:operation" element={<PracticePage />} />
+        <Route path="/visualizer" element={<VisualizerPage />} />
       </Routes>
     </Router>
   )
