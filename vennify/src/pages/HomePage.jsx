@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';  // Add this import
 import Footer from '../components/Footer';
 import MathLines from '../components/MathLines';
 import VennDiagram from '../components/VennDiagram';
 
 const HomePage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const navigate = useNavigate();  // Add this hook
   
   useEffect(() => {
     setIsLoaded(true);
@@ -55,8 +57,11 @@ const HomePage = () => {
               <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto">
                 Visualize Set Operations with Venn Diagrams
               </p>
-              <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-medium text-lg 
-                            relative overflow-hidden group transition-all duration-300 ease-out hover:scale-105 transform">
+              <button 
+                onClick={() => navigate('/visualizer')}
+                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-medium text-lg 
+                            relative overflow-hidden group transition-all duration-300 ease-out hover:scale-105 transform"
+              >
                 <span className="relative z-10">Get Started</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out"></div>
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-30 group-hover:opacity-50 blur-sm transition-all duration-300 ease-out"></div>
@@ -203,8 +208,11 @@ const HomePage = () => {
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                  <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-medium min-w-[180px]
-                            transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
+                  <button 
+                    onClick={() => navigate('/visualizer')}
+                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-medium min-w-[180px]
+                              transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
+                  >
                     Get Started Free
                   </button>
                   <button className="px-8 py-4 bg-transparent border border-blue-500 rounded-xl font-medium text-blue-400 min-w-[180px]

@@ -133,8 +133,7 @@ const VisualizerPage = () => {
 
   const evaluateExpression = (expression) => {
     try {
-      // First evaluate any nested intersections/unions inside parentheses
-      const evaluateNestedExpression = (tokens) => {
+      const evaluateSimpleExpression = (tokens) => {
         const stack = [];
         let result = null;
 
@@ -173,6 +172,42 @@ const VisualizerPage = () => {
         return result;
       };
 
+      // Recursively evaluate nested parentheses
+      const evaluateParentheses = (tokens) => {
+        const stack = [];
+        const output = [];
+
+        for (let i = 0; i < tokens.length; i++) {
+          if (tokens[i] === '(') {
+            // Find matching closing parenthesis
+            let count = 1;
+            let j = i + 1;
+            let inner = [];
+            
+            while (j < tokens.length && count > 0) {
+              if (tokens[j] === '(') count++;
+              if (tokens[j] === ')') count--;
+              if (count > 0) inner.push(tokens[j]);
+              j++;
+            }
+
+            if (count !== 0) {
+              throw new Error('Mismatched parentheses');
+            }
+
+            // Recursively evaluate inner expression
+            const innerResult = evaluateParentheses(inner);
+            output.push(innerResult);
+            i = j - 1; // Skip processed tokens
+          } else if (tokens[i] !== ')') {
+            output.push(tokens[i]);
+          }
+        }
+
+        // Evaluate the resulting expression
+        return evaluateSimpleExpression(output);
+      };
+
       // Clean and tokenize expression
       const tokens = expression
         .replace(/([()∪∩\-⊆])/g, ' $1 ')
@@ -180,32 +215,8 @@ const VisualizerPage = () => {
         .split(/\s+/)
         .filter(Boolean);
 
-      // Find and evaluate parentheses first
-      const stack = [];
-      let i = 0;
-      while (i < tokens.length) {
-        if (tokens[i] === '(') {
-          let j = i + 1;
-          let count = 1;
-          while (j < tokens.length && count > 0) {
-            if (tokens[j] === '(') count++;
-            if (tokens[j] === ')') count--;
-            j++;
-          }
-          if (count !== 0) throw new Error('Mismatched parentheses');
-          
-          // Evaluate the nested expression
-          const nestedResult = evaluateNestedExpression(tokens.slice(i + 1, j - 1));
-          stack.push(nestedResult);
-          i = j;
-        } else {
-          stack.push(tokens[i]);
-          i++;
-        }
-      }
-
-      // Evaluate the final expression
-      return evaluateNestedExpression(stack);
+      // Start evaluation
+      return evaluateParentheses(tokens);
 
     } catch (error) {
       console.error('Expression evaluation error:', error);
