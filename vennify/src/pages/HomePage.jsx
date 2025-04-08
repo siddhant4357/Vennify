@@ -217,7 +217,7 @@ const HomePage = () => {
                     Ready to Visualize Your Data?
                   </h2>
                   <p className="text-gray-300 max-w-2xl mx-auto">
-                    Start creating beautiful Venn diagrams and visualizing set operations today. No credit card required.
+                    Start creating beautiful Venn diagrams and visualizing set operations today.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4">

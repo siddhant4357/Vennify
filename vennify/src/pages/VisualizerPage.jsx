@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import MathLines from '../components/MathLines';
-import { useNavigate } from 'react-router-dom';  // Add this import at the top
-
+import { useNavigate, Link } from 'react-router-dom';  // Add this import at the top
+import Footer from '../components/Footer'; // Add this import at the top with other imports
 
 const VisualizerPage = () => {
   const navigate = useNavigate();  // Add this hook
@@ -21,6 +21,7 @@ const VisualizerPage = () => {
   const [questionInput, setQuestionInput] = useState('');
   const [parsedQuestion, setParsedQuestion] = useState(null);
   const [isQuestionEvaluated, setIsQuestionEvaluated] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const twoSetOperations = [
     { name: 'Union (A ∪ B)', fn: (a, b) => new Set([...a, ...b]) },
@@ -435,6 +436,10 @@ if (currentOperation) {
 
   }, [sets, currentOperation, result, viewType]);
 
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
   // Add example questions with more complex expressions
   const exampleQuestions = [
     'A ∪ B',
@@ -446,268 +451,282 @@ if (currentOperation) {
     '( A ∩ B ) ∪ C'
   ];
 
-  // Update the return JSX for better mobile layout
+  // Update the return statement structure to ensure footer visibility
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen flex flex-col bg-black text-white font-sans">
       <MathLines />
       
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header section with responsive layout */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back
-          </button>
-          <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-            Set Operation Visualizer
-          </h1>
-        </div>
-
-        {/* Main content with improved mobile layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 container mx-auto">
-          {/* Venn Diagram Section */}
-          <div className="xl:sticky xl:top-4 order-1 xl:order-2 w-full">
-            <div className="bg-gray-800 rounded-xl p-4 sm:p-6 max-w-[95vw] mx-auto">
-              <div 
-                id="venn-diagram" 
-                ref={diagramRef} 
-                className="w-full aspect-square max-w-[min(500px,90vw)] mx-auto overflow-hidden"
-              />
-              
-              {/* Responsive Region Guide */}
-              <div className="mt-4 bg-gray-700/50 rounded-lg p-3 sm:p-4 overflow-x-auto">
-                <h4 className="text-sm font-semibold text-gray-400 mb-2">Region Guide</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm min-w-[200px]">
-                  {viewType === 'three' ? (
-                    <>
-                      <div>• Center: A ∩ B ∩ C</div>
-                      <div>• Top: A ∩ B</div>
-                      <div>• Right: B ∩ C</div>
-                      <div>• Left: A ∩ C</div>
-                    </>
-                  ) : (
-                    <div>• Center: A ∩ B</div>
-                  )}
-                </div>
+      <div className="relative z-10 flex-1">
+        {/* Navigation */}
+        <nav className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm transition-all duration-700 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                </svg>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
-                <button
-                  onClick={clearAll}
-                  className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors w-full sm:w-auto"
-                >
-                  Clear All
-                </button>
-                <button
-                  onClick={downloadDiagram}
-                  className="px-4 py-2 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors w-full sm:w-auto"
-                >
-                  Download Diagram
-                </button>
-              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Vennify</span>
             </div>
+            <div className="hidden md:flex items-center space-x-6">
+              <Link to="/#features" className="text-gray-300 hover:text-white transition-colors">Features</Link>
+              <Link to="/visualizer" className="text-gray-300 hover:text-white transition-colors">Visualizer</Link>
+              <Link to="/theory" className="text-gray-300 hover:text-white transition-colors">Learn</Link>
+              <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
+            </div>
+            <button className="md:hidden text-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
+        </nav>
 
-          {/* Controls Section */}
-          <div className="space-y-6 order-2 xl:order-1">
-            {/* Control Panel */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-6">
-              {/* View Type Selector */}
-              <div className="bg-gray-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4">View Type</h3>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => setViewType('two')}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      viewType === 'two' 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-700 hover:bg-gray-600'
-                    }`}
-                  >
-                    Two Sets
-                  </button>
-                  <button
-                    onClick={() => setViewType('three')}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      viewType === 'three' 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-700 hover:bg-gray-600'
-                    }`}
-                  >
-                    Three Sets
-                  </button>
+        {/* Main content */}
+        <div className="pt-24 pb-16">
+          <div className="container mx-auto px-4">
+            {/* Rest of your content */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {/* Venn Diagram Section */}
+              <div className="xl:sticky xl:top-4 order-1 xl:order-2 w-full">
+                <div className="bg-gray-800 rounded-xl p-4 sm:p-6 max-w-[95vw] mx-auto">
+                  <div 
+                    id="venn-diagram" 
+                    ref={diagramRef} 
+                    className="w-full aspect-square max-w-[min(500px,90vw)] mx-auto overflow-hidden"
+                  />
+                  
+                  {/* Responsive Region Guide */}
+                  <div className="mt-4 bg-gray-700/50 rounded-lg p-3 sm:p-4 overflow-x-auto">
+                    <h4 className="text-sm font-semibold text-gray-400 mb-2">Region Guide</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm min-w-[200px]">
+                      {viewType === 'three' ? (
+                        <>
+                          <div>• Center: A ∩ B ∩ C</div>
+                          <div>• Top: A ∩ B</div>
+                          <div>• Right: B ∩ C</div>
+                          <div>• Left: A ∩ C</div>
+                        </>
+                      ) : (
+                        <div>• Center: A ∩ B</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
+                    <button
+                      onClick={clearAll}
+                      className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors w-full sm:w-auto"
+                    >
+                      Clear All
+                    </button>
+                    <button
+                      onClick={downloadDiagram}
+                      className="px-4 py-2 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors w-full sm:w-auto"
+                    >
+                      Download Diagram
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Question Builder */}
-              <div className="bg-gray-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4">Question Builder</h3>
-                
-                {/* Expression Input */}
-                <div className="mb-4">
-                  <div className="bg-gray-700 rounded-lg p-3 mb-2 min-h-[40px] break-all">
-                    {questionInput || 'Click buttons to build expression'}
-                  </div>
-                  
-                  {/* Operator Buttons */}
-                  <div className="flex flex-wrap gap-2">
-                    {operatorButtons.map((btn) => (
+              {/* Controls Section */}
+              <div className="space-y-6 order-2 xl:order-1">
+                {/* Control Panel */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-6">
+                  {/* View Type Selector */}
+                  <div className="bg-gray-800 rounded-xl p-6">
+                    <h3 className="text-xl font-semibold mb-4">View Type</h3>
+                    <div className="flex space-x-4">
                       <button
-                        key={btn.symbol}
-                        onClick={() => setQuestionInput(prev => prev + ' ' + btn.symbol + ' ')}
+                        onClick={() => setViewType('two')}
                         className={`px-4 py-2 rounded-lg transition-colors ${
-                          btn.type === 'set' 
-                            ? 'bg-blue-500/20 hover:bg-blue-500/30'
-                            : btn.type === 'operator'
-                            ? 'bg-purple-500/20 hover:bg-purple-500/30'
-                            : 'bg-gray-600/20 hover:bg-gray-600/30'
+                          viewType === 'two' 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-700 hover:bg-gray-600'
                         }`}
                       >
-                        {btn.symbol}
+                        Two Sets
                       </button>
-                    ))}
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => {
-                        try {
-                          const result = evaluateExpression(questionInput);
-                          setResult(result);
-                          setCurrentOperation(questionInput);
-                          setIsQuestionEvaluated(true);
-                        } catch (error) {
-                          // Add error handling UI
-                          alert('Invalid expression. Please check your input.');
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
-                    >
-                      Evaluate
-                    </button>
-                    <button
-                      onClick={() => {
-                        setQuestionInput('');
-                        setIsQuestionEvaluated(false);
-                      }}
-                      className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-
-                {/* Example Questions */}
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-2">Example Questions</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {exampleQuestions.map((example) => (
                       <button
-                        key={example}
-                        onClick={() => setQuestionInput(example)}
-                        className="px-3 py-1 text-sm bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+                        onClick={() => setViewType('three')}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          viewType === 'three' 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-700 hover:bg-gray-600'
+                        }`}
                       >
-                        {example}
+                        Three Sets
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Question Builder */}
+                  <div className="bg-gray-800 rounded-xl p-6">
+                    <h3 className="text-xl font-semibold mb-4">Question Builder</h3>
+                    
+                    {/* Expression Input */}
+                    <div className="mb-4">
+                      <div className="bg-gray-700 rounded-lg p-3 mb-2 min-h-[40px] break-all">
+                        {questionInput || 'Click buttons to build expression'}
+                      </div>
+                      
+                      {/* Operator Buttons */}
+                      <div className="flex flex-wrap gap-2">
+                        {operatorButtons.map((btn) => (
+                          <button
+                            key={btn.symbol}
+                            onClick={() => setQuestionInput(prev => prev + ' ' + btn.symbol + ' ')}
+                            className={`px-4 py-2 rounded-lg transition-colors ${
+                              btn.type === 'set' 
+                                ? 'bg-blue-500/20 hover:bg-blue-500/30'
+                                : btn.type === 'operator'
+                                ? 'bg-purple-500/20 hover:bg-purple-500/30'
+                                : 'bg-gray-600/20 hover:bg-gray-600/30'
+                            }`}
+                          >
+                            {btn.symbol}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => {
+                            try {
+                              const result = evaluateExpression(questionInput);
+                              setResult(result);
+                              setCurrentOperation(questionInput);
+                              setIsQuestionEvaluated(true);
+                            } catch (error) {
+                              // Add error handling UI
+                              alert('Invalid expression. Please check your input.');
+                            }
+                          }}
+                          className="flex-1 px-4 py-2 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
+                        >
+                          Evaluate
+                        </button>
+                        <button
+                          onClick={() => {
+                            setQuestionInput('');
+                            setIsQuestionEvaluated(false);
+                          }}
+                          className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Example Questions */}
+                    <div className="mt-4">
+                      <h4 className="text-sm font-semibold text-gray-400 mb-2">Example Questions</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {exampleQuestions.map((example) => (
+                          <button
+                            key={example}
+                            onClick={() => setQuestionInput(example)}
+                            className="px-3 py-1 text-sm bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+                          >
+                            {example}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Input Section */}
+                  <div className="bg-gray-800 rounded-xl p-6 space-y-4">
+                    {Object.entries(sets)
+                      .filter(([key]) => viewType === 'three' || key !== 'C')
+                      .map(([key, set]) => (
+                        <div key={key} className="space-y-2">
+                          <input
+                            type="text"
+                            placeholder={`${set.name} name`}
+                            value={set.name}
+                            onChange={(e) => handleSetNameChange(key, e.target.value)}
+                            className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Enter elements (comma-separated)"
+                            value={set.rawInput}
+                            onChange={(e) => handleSetChange(key, e.target.value)}
+                            className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white"
+                          />
+                        </div>
                     ))}
                   </div>
-                </div>
-              </div>
 
-              {/* Input Section */}
-              <div className="bg-gray-800 rounded-xl p-6 space-y-4">
-                {Object.entries(sets)
-                  .filter(([key]) => viewType === 'three' || key !== 'C')
-                  .map(([key, set]) => (
-                    <div key={key} className="space-y-2">
-                      <input
-                        type="text"
-                        placeholder={`${set.name} name`}
-                        value={set.name}
-                        onChange={(e) => handleSetNameChange(key, e.target.value)}
-                        className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Enter elements (comma-separated)"
-                        value={set.rawInput}
-                        onChange={(e) => handleSetChange(key, e.target.value)}
-                        className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white"
-                      />
+                  {/* Operations Section */}
+                  <div className="bg-gray-800 rounded-xl p-6">
+                    <div className="space-y-6">
+                      {viewType === 'two' && (
+                        <div>
+                          <h3 className="text-xl font-semibold mb-4">Two-Set Operations</h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {twoSetOperations.map((op) => (
+                              <button
+                                key={op.name}
+                                onClick={() => handleOperation(op)}
+                                className="px-4 py-2 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
+                              >
+                                {op.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {viewType === 'three' && (
+                        <div>
+                          <h3 className="text-xl font-semibold mb-4">Three-Set Operations</h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {threeSetOperations.map((op) => (
+                              <button
+                                key={op.name}
+                                onClick={() => handleOperation(op)}
+                                className="px-4 py-2 bg-purple-500/20 rounded-lg hover:bg-purple-500/30 transition-colors"
+                              >
+                                {op.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                ))}
-              </div>
-
-              {/* Operations Section */}
-              <div className="bg-gray-800 rounded-xl p-6">
-                <div className="space-y-6">
-                  {viewType === 'two' && (
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4">Two-Set Operations</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {twoSetOperations.map((op) => (
-                          <button
-                            key={op.name}
-                            onClick={() => handleOperation(op)}
-                            className="px-4 py-2 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
-                          >
-                            {op.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {viewType === 'three' && (
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4">Three-Set Operations</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {threeSetOperations.map((op) => (
-                          <button
-                            key={op.name}
-                            onClick={() => handleOperation(op)}
-                            className="px-4 py-2 bg-purple-500/20 rounded-lg hover:bg-purple-500/30 transition-colors"
-                          >
-                            {op.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Result Section */}
-              {currentOperation && (
-                <div className="bg-gray-800 rounded-xl p-6">
-                  <h3 className="text-xl font-semibold mb-4">Result: {currentOperation}</h3>
-                  <div className="bg-gray-700 rounded-lg p-4">
-                    {currentOperation.startsWith('Is') ? (
-                      <div className={`font-bold ${
-                        result instanceof Set && Array.from(result)[0] ? 'text-green-400' : 'text-red-400'
-                      }`}>
-                        {result instanceof Set && Array.from(result)[0] ? 'True' : 'False'}
-                      </div>
-                    ) : (
-                      result instanceof Set ? Array.from(result).join(', ') : 'Empty set'
-                    )}
                   </div>
+
+                  {/* Result Section */}
+                  {currentOperation && (
+                    <div className="bg-gray-800 rounded-xl p-6">
+                      <h3 className="text-xl font-semibold mb-4">Result: {currentOperation}</h3>
+                      <div className="bg-gray-700 rounded-lg p-4">
+                        {currentOperation.startsWith('Is') ? (
+                          <div className={`font-bold ${
+                            result instanceof Set && Array.from(result)[0] ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            {result instanceof Set && Array.from(result)[0] ? 'True' : 'False'}
+                          </div>
+                        ) : (
+                          result instanceof Set ? Array.from(result).join(', ') : 'Empty set'
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-
-      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
