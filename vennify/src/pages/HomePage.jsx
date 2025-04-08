@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Add this import
+import { useNavigate, Link } from 'react-router-dom';  // Add this import
 import Footer from '../components/Footer';
 import MathLines from '../components/MathLines';
 import VennDiagram from '../components/VennDiagram';
@@ -22,7 +22,7 @@ const HomePage = () => {
         {/* Navigation */}
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
@@ -32,9 +32,9 @@ const HomePage = () => {
             </div>
                 <div className="hidden md:flex items-center space-x-6">
                     <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
-                    <a href="/visualizer" className="text-gray-300 hover:text-white transition-colors">Visualizer</a>
-                    <a href="/theory" className="text-gray-300 hover:text-white transition-colors">Learn</a>
-                    <a href="/about" className="text-gray-300 hover:text-white transition-colors">About</a>
+                    <Link to="/visualizer" className="text-gray-300 hover:text-white transition-colors">Visualizer</Link>
+                    <Link to="/theory" className="text-gray-300 hover:text-white transition-colors">Learn</Link>
+                    <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
                 </div>
             <button className="md:hidden text-gray-300">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,12 +103,15 @@ const HomePage = () => {
                   <p className="text-gray-400 mb-6 flex-grow">
                     Create custom Venn diagrams with our intuitive drag-and-drop interface. Perform operations like Union, Intersection, and Complement with real-time visual feedback.
                   </p>
-                  <a href="#" className="text-blue-400 flex items-center group-hover:text-blue-300 transition-colors">
+                  <Link 
+                    to="/visualizer" 
+                    className="text-blue-400 flex items-center group-hover:text-blue-300 transition-colors"
+                  >
                     Explore tool
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -125,12 +128,15 @@ const HomePage = () => {
                   <p className="text-gray-400 mb-6 flex-grow">
                     Interactive tutorials and step-by-step guides to help you understand set theory concepts like never before. Master the fundamentals with visual learning.
                   </p>
-                  <a href="#" className="text-purple-400 flex items-center group-hover:text-purple-300 transition-colors">
+                  <Link 
+                    to="/theory" 
+                    className="text-purple-400 flex items-center group-hover:text-purple-300 transition-colors"
+                  >
                     Start learning
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -147,7 +153,14 @@ const HomePage = () => {
                   <p className="text-gray-400 mb-6 flex-grow">
                     Connect with fellow math enthusiasts, share diagrams, and collaborate on complex set problems. Join discussions and advance your knowledge together.
                   </p>
-                  <a href="#" className="text-teal-400 flex items-center group-hover:text-teal-300 transition-colors">
+                  <a 
+                    href="#footer" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.querySelector('footer').scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="text-teal-400 flex items-center group-hover:text-teal-300 transition-colors"
+                  >
                     Join community
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

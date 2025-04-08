@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import MathLines from '../components/MathLines';
+import { useNavigate } from 'react-router-dom';  // Add this import at the top
+
 
 const VisualizerPage = () => {
+  const navigate = useNavigate();  // Add this hook
   const [sets, setSets] = useState({
     A: { name: 'Set A', elements: new Set(), rawInput: '' },
     B: { name: 'Set B', elements: new Set(), rawInput: '' },
@@ -225,22 +228,25 @@ const VisualizerPage = () => {
     }
   };
 
+  // Update the diagram dimensions and responsiveness
   useEffect(() => {
     if (!diagramRef.current) return;
 
     // Clear previous diagram
     d3.select(diagramRef.current).selectAll("*").remove();
 
-    const width = 500;
-    const height = 500;
-    const radius = 100;
+    // Make diagram responsive
+    const containerWidth = diagramRef.current.clientWidth;
+    const width = Math.min(500, Math.min(containerWidth, window.innerWidth * 0.9));
+    const height = width; // Keep aspect ratio 1:1
+    const radius = width * (window.innerWidth < 640 ? 0.15 : 0.2); // Smaller radius on mobile
 
     const svg = d3.select(diagramRef.current)
       .append('svg')
       .attr('width', width)
       .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${width/2},${height/2})`);
+      .attr('viewBox', `${-width/2} ${-height/2} ${width} ${height}`)
+      .append('g');
 
     // Define gradients
     const defs = svg.append("defs");
@@ -272,16 +278,16 @@ const VisualizerPage = () => {
     gradientC.append("stop").attr("offset", "0%").attr("stop-color", "#34D399").attr("stop-opacity", 0.8);
     gradientC.append("stop").attr("offset", "100%").attr("stop-color", "#059669").attr("stop-opacity", 0.5);
 
-    // Draw circles for each set
+    // Update circle positions based on screen size
     const circles = viewType === 'three' 
       ? [
-          { x: -70, y: -40, gradient: "url(#gradientA)", label: sets.A.name },
-          { x: 70, y: -40, gradient: "url(#gradientB)", label: sets.B.name },
-          { x: 0, y: 80, gradient: "url(#gradientC)", label: sets.C.name }
+          { x: -radius*0.7, y: -radius*0.4, gradient: "url(#gradientA)", label: sets.A.name },
+          { x: radius*0.7, y: -radius*0.4, gradient: "url(#gradientB)", label: sets.B.name },
+          { x: 0, y: radius*0.8, gradient: "url(#gradientC)", label: sets.C.name }
         ]
       : [
-          { x: -50, y: 0, gradient: "url(#gradientA)", label: sets.A.name },
-          { x: 50, y: 0, gradient: "url(#gradientB)", label: sets.B.name }
+          { x: -radius*0.5, y: 0, gradient: "url(#gradientA)", label: sets.A.name },
+          { x: radius*0.5, y: 0, gradient: "url(#gradientB)", label: sets.B.name }
         ];
 
     // Draw circles
@@ -331,19 +337,22 @@ const VisualizerPage = () => {
     });
 
     // Add intersection indicators if there are elements
-    if (currentOperation) {
-      const resultText = svg.append("text")
-        .attr("x", 0)
-        .attr("y", -height/2 + 30)
-        .attr("text-anchor", "middle")
-        .style("fill", "white")
-        .style("font-size", "14px")
-        .text(`${currentOperation}: ${[...result].join(', ')}`);
-    }
+   // Update the result display section
+if (currentOperation) {
+  const resultArray = result ? Array.from(result) : [];
+  const resultText = svg.append("text")
+    .attr("x", 0)
+    .attr("y", -height/2 + 30)
+    .attr("text-anchor", "middle")
+    .style("fill", "white")
+    .style("font-size", "14px")
+    .text(`${currentOperation}: ${resultArray.join(', ')}`);
+}
 
     // Update the displayElements function
     const displayElements = (elements, x, y) => {
-      const elementArray = Array.from(elements);
+      // Ensure elements is iterable by converting to Array and handling null/undefined
+      const elementArray = elements ? Array.from(elements) : [];
       if (elementArray.length === 0) return;
 
       // Create a container for the elements
@@ -352,24 +361,24 @@ const VisualizerPage = () => {
 
       // Improved background for better visibility
       container.append("rect")
-        .attr("x", -40)  // Increased width
+        .attr("x", -40)
         .attr("y", -10)
-        .attr("width", 80) // Increased width
-        .attr("height", elementArray.length * 20 + 8) // Increased height
+        .attr("width", 80)
+        .attr("height", elementArray.length * 20 + 8)
         .attr("rx", 4)
-        .attr("fill", "rgba(0, 0, 0, 0.7)") // Darker background
+        .attr("fill", "rgba(0, 0, 0, 0.7)")
         .attr("stroke", "rgba(255, 255, 255, 0.2)");
 
       // Display elements with better spacing
       elementArray.forEach((element, i) => {
         container.append("text")
           .attr("x", 0)
-          .attr("y", i * 20) // Increased spacing
+          .attr("y", i * 20)
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .style("fill", "white")
-          .style("font-size", "14px") // Larger font
-          .style("font-weight", "500") // Bolder text
+          .style("font-size", "14px")
+          .style("font-weight", "500")
           .text(element);
       });
     };
@@ -437,18 +446,76 @@ const VisualizerPage = () => {
     '( A ∩ B ) ∪ C'
   ];
 
+  // Update the return JSX for better mobile layout
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <MathLines />
       
       <div className="container mx-auto px-4 py-8 relative z-10">
-        <h1 className="text-4xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-          Set Operation Visualizer
-        </h1>
+        {/* Header section with responsive layout */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </button>
+          <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Set Operation Visualizer
+          </h1>
+        </div>
 
-        {/* Mobile-first grid layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <div className="space-y-6">
+        {/* Main content with improved mobile layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 container mx-auto">
+          {/* Venn Diagram Section */}
+          <div className="xl:sticky xl:top-4 order-1 xl:order-2 w-full">
+            <div className="bg-gray-800 rounded-xl p-4 sm:p-6 max-w-[95vw] mx-auto">
+              <div 
+                id="venn-diagram" 
+                ref={diagramRef} 
+                className="w-full aspect-square max-w-[min(500px,90vw)] mx-auto overflow-hidden"
+              />
+              
+              {/* Responsive Region Guide */}
+              <div className="mt-4 bg-gray-700/50 rounded-lg p-3 sm:p-4 overflow-x-auto">
+                <h4 className="text-sm font-semibold text-gray-400 mb-2">Region Guide</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm min-w-[200px]">
+                  {viewType === 'three' ? (
+                    <>
+                      <div>• Center: A ∩ B ∩ C</div>
+                      <div>• Top: A ∩ B</div>
+                      <div>• Right: B ∩ C</div>
+                      <div>• Left: A ∩ C</div>
+                    </>
+                  ) : (
+                    <div>• Center: A ∩ B</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
+                <button
+                  onClick={clearAll}
+                  className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors w-full sm:w-auto"
+                >
+                  Clear All
+                </button>
+                <button
+                  onClick={downloadDiagram}
+                  className="px-4 py-2 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors w-full sm:w-auto"
+                >
+                  Download Diagram
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls Section */}
+          <div className="space-y-6 order-2 xl:order-1">
             {/* Control Panel */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-6">
               {/* View Type Selector */}
@@ -624,58 +691,23 @@ const VisualizerPage = () => {
                   <div className="bg-gray-700 rounded-lg p-4">
                     {currentOperation.startsWith('Is') ? (
                       <div className={`font-bold ${
-                        [...result][0] ? 'text-green-400' : 'text-red-400'
+                        result instanceof Set && Array.from(result)[0] ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {[...result][0] ? 'True' : 'False'}
+                        {result instanceof Set && Array.from(result)[0] ? 'True' : 'False'}
                       </div>
                     ) : (
-                      [...result].join(', ') || 'Empty set'
+                      result instanceof Set ? Array.from(result).join(', ') : 'Empty set'
                     )}
                   </div>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Venn Diagram Section */}
-          <div className="xl:sticky xl:top-4">
-            <div className="bg-gray-800 rounded-xl p-6">
-              <div id="venn-diagram" ref={diagramRef} className="w-full max-w-[500px] mx-auto aspect-square" />
-              
-              <div className="mt-4 bg-gray-700/50 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-400 mb-2">Region Guide</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {viewType === 'three' ? (
-                    <>
-                      <div>• Center: A ∩ B ∩ C</div>
-                      <div>• Top: A ∩ B</div>
-                      <div>• Right: B ∩ C</div>
-                      <div>• Left: A ∩ C</div>
-                    </>
-                  ) : (
-                    <div>• Center: A ∩ B</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4 mt-4">
-                <button
-                  onClick={clearAll}
-                  className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors"
-                >
-                  Clear All
-                </button>
-                <button
-                  onClick={downloadDiagram}
-                  className="px-4 py-2 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors"
-                >
-                  Download Diagram
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
+
+
+      
     </div>
   );
 };
