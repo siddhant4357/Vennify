@@ -451,12 +451,12 @@ if (currentOperation) {
     '( A ∩ B ) ∪ C'
   ];
 
-  // Update the return statement structure to ensure footer visibility
+  // Update the main container structure
   return (
     <div className="min-h-screen flex flex-col bg-black text-white font-sans">
       <MathLines />
       
-      <div className="relative z-10 flex-1">
+      <div className="relative z-10 flex flex-col min-h-screen">
         {/* Navigation */}
         <nav className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm transition-all duration-700 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -483,7 +483,7 @@ if (currentOperation) {
         </nav>
 
         {/* Main content */}
-        <div className="pt-24 pb-16">
+        <div className="flex-1 pt-24 pb-16">
           <div className="container mx-auto px-4">
             {/* Rest of your content */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -723,10 +723,10 @@ if (currentOperation) {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Footer */}
-      <Footer />
+        {/* Footer */}
+        <Footer />
+      </div>
     </div>
   );
 };
