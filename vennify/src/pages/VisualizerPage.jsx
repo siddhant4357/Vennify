@@ -22,6 +22,7 @@ const VisualizerPage = () => {
   const [parsedQuestion, setParsedQuestion] = useState(null);
   const [isQuestionEvaluated, setIsQuestionEvaluated] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Add state for mobile menu
 
   const twoSetOperations = [
     { name: 'Union (A ∪ B)', fn: (a, b) => new Set([...a, ...b]) },
@@ -460,6 +461,7 @@ if (currentOperation) {
         {/* Navigation */}
         <nav className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm transition-all duration-700 ease-in-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+            {/* Logo section - unchanged */}
             <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -468,17 +470,62 @@ if (currentOperation) {
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Vennify</span>
             </div>
+
+            {/* Desktop menu - unchanged */}
             <div className="hidden md:flex items-center space-x-6">
               <Link to="/#features" className="text-gray-300 hover:text-white transition-colors">Features</Link>
               <Link to="/visualizer" className="text-gray-300 hover:text-white transition-colors">Visualizer</Link>
               <Link to="/theory" className="text-gray-300 hover:text-white transition-colors">Learn</Link>
               <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
             </div>
-            <button className="md:hidden text-gray-300">
+
+            {/* Mobile menu button - add onClick handler */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden text-gray-300"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+          </div>
+
+          {/* Add Mobile Menu Panel */}
+          <div className={`md:hidden bg-gray-900/95 backdrop-blur-sm transition-all duration-300 ${
+            isMobileMenuOpen 
+              ? 'opacity-100 translate-y-0 h-auto' 
+              : 'opacity-0 -translate-y-full pointer-events-none h-0'
+          }`}>
+            <div className="container mx-auto px-6 py-4 space-y-4">
+              <Link 
+                to="/#features" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                Features
+              </Link>
+              <Link 
+                to="/visualizer" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                Visualizer
+              </Link>
+              <Link 
+                to="/theory" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                Learn
+              </Link>
+              <Link 
+                to="/about" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                About
+              </Link>
+            </div>
           </div>
         </nav>
 

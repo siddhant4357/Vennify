@@ -5,6 +5,7 @@ import MathLines from '../components/MathLines';
 
 const AboutPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Add this state
   const navigate = useNavigate(); // Add navigate hook
 
   useEffect(() => {
@@ -41,11 +42,53 @@ const AboutPage = () => {
               <Link to="/theory" className="text-gray-300 hover:text-white transition-colors">Learn</Link>
               <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
             </div>
-            <button className="md:hidden text-gray-300">
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden text-gray-300"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+          </div>
+
+          {/* Add Mobile Menu Panel */}
+          <div className={`md:hidden bg-gray-900/95 backdrop-blur-sm transition-all duration-300 ${
+            isMobileMenuOpen 
+              ? 'opacity-100 translate-y-0 h-auto' 
+              : 'opacity-0 -translate-y-full pointer-events-none h-0'
+          }`}>
+            <div className="container mx-auto px-6 py-4 space-y-4">
+              <Link 
+                to="/" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                Home
+              </Link>
+              <Link 
+                to="/visualizer" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                Visualizer
+              </Link>
+              <Link 
+                to="/theory" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                Learn
+              </Link>
+              <Link 
+                to="/about" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-gray-300 hover:text-white transition-colors"
+              >
+                About
+              </Link>
+            </div>
           </div>
         </nav>
 
