@@ -35,7 +35,7 @@ Vennify is an interactive web application designed to help students and educator
 - **Routing**: React Router
 - **Visualization**: D3.js
 - **Build Tool**: Vite
-- **Deployment**: Vercel
+- **Deployment**: Render
 
 ## Getting Started
 
